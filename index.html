@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>부스 스탬프 투어</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 부스 스탬프 투어</h1>
+            <p class="subtitle">각 부스를 방문하고 사진을 찍어 스탬프를 모으세요!</p>
+        </header>
+
+        <div class="stamp-counter">
+            <span id="stampCount">0</span> / 5 완료
+        </div>
+
+        <div class="roadmap">
+            <!-- 부스들과 연결선 -->
+            <svg class="connections" viewBox="0 0 300 600" xmlns="http://www.w3.org/2000/svg">
+                <!-- 부스 간 연결선 -->
+                <path d="M 150 60 L 150 140" class="connection-line" id="line1" />
+                <path d="M 150 200 L 150 280" class="connection-line" id="line2" />
+                <path d="M 150 340 L 150 420" class="connection-line" id="line3" />
+                <path d="M 150 480 L 150 560" class="connection-line" id="line4" />
+            </svg>
+
+            <!-- 부스 1 -->
+            <div class="booth" data-booth-id="booth1" style="top: 0;">
+                <div class="booth-circle">
+                    <span class="booth-number">1</span>
+                    <span class="stamp-icon">✓</span>
+                </div>
+                <div class="booth-label">부스 1</div>
+            </div>
+
+            <!-- 부스 2 -->
+            <div class="booth" data-booth-id="booth2" style="top: 140px;">
+                <div class="booth-circle">
+                    <span class="booth-number">2</span>
+                    <span class="stamp-icon">✓</span>
+                </div>
+                <div class="booth-label">부스 2</div>
+            </div>
+
+            <!-- 부스 3 -->
+            <div class="booth" data-booth-id="booth3" style="top: 280px;">
+                <div class="booth-circle">
+                    <span class="booth-number">3</span>
+                    <span class="stamp-icon">✓</span>
+                </div>
+                <div class="booth-label">부스 3</div>
+            </div>
+
+            <!-- 부스 4 -->
+            <div class="booth" data-booth-id="booth4" style="top: 420px;">
+                <div class="booth-circle">
+                    <span class="booth-number">4</span>
+                    <span class="stamp-icon">✓</span>
+                </div>
+                <div class="booth-label">부스 4</div>
+            </div>
+
+            <!-- 부스 5 -->
+            <div class="booth" data-booth-id="booth5" style="top: 560px;">
+                <div class="booth-circle">
+                    <span class="booth-number">5</span>
+                    <span class="stamp-icon">✓</span>
+                </div>
+                <div class="booth-label">부스 5</div>
+            </div>
+        </div>
+
+        <!-- 카메라 입력 (숨김) -->
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+
+        <!-- 완료 메시지 -->
+        <div id="completeModal" class="modal">
+            <div class="modal-content">
+                <div class="completion-icon">🏆</div>
+                <h2>🎉 축하합니다!</h2>
+                <p class="completion-message">모든 부스의 스탬프를 모았습니다!</p>
+                <p class="completion-subtitle">스탬프 투어를 완주하셨습니다! 🎊</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
