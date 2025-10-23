@@ -164,7 +164,7 @@ class StampTourApp {
     updateConnectionLines() {
         const stamps = StorageManager.getStampStatus();
         
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= 9; i++) {
             const currentBooth = `booth${i}`;
             const nextBooth = `booth${i + 1}`;
             const line = document.getElementById(`line${i}`);
@@ -182,7 +182,7 @@ class StampTourApp {
         const stamps = StorageManager.getStampStatus();
         const completedCount = Object.values(stamps).filter(v => v === true).length;
         
-        if (completedCount === 5) {
+        if (completedCount === 10) {
             setTimeout(() => {
                 this.completeModal.classList.add('show');
                 // 완료 후에는 모달을 자동으로 닫지 않음 (영구 축하 화면)
