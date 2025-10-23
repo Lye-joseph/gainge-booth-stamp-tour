@@ -135,3 +135,9 @@ Gainge-Test/
 
 MIT License - 자유롭게 사용, 수정, 배포 가능합니다.
 
+## 🚀 배포 상태
+
+- ✅ GitHub Pages 자동 배포 설정 완료
+- ✅ Cursor Git 연동 설정 완료
+- 🌐 배포 URL: https://lye-joseph.github.io/gainge-booth-stamp-tour/
+
