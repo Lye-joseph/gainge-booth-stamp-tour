@@ -10,7 +10,7 @@ body {
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -65,13 +65,13 @@ header h1 {
     margin-bottom: 30px;
     font-size: 18px;
     font-weight: bold;
-    color: #667eea;
+    color: #1a237e;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 #stampCount {
     font-size: 32px;
-    color: #764ba2;
+    color: #283593;
 }
 
 .roadmap {
@@ -132,9 +132,9 @@ header h1 {
 }
 
 .booth.stamped .booth-circle {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    border-color: #1a237e;
+    box-shadow: 0 4px 20px rgba(26, 35, 126, 0.4);
 }
 
 .booth.stamped .booth-number {
@@ -155,7 +155,7 @@ header h1 {
 }
 
 .booth.stamped .booth-label {
-    color: #667eea;
+    color: #1a237e;
 }
 
 /* 애니메이션 효과 */
@@ -234,7 +234,7 @@ header h1 {
 .modal-content h2 {
     font-size: 32px;
     margin-bottom: 15px;
-    color: #667eea;
+    color: #1a237e;
 }
 
 .completion-message {
