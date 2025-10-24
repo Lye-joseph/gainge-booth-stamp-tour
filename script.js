@@ -79,7 +79,6 @@ class StampTourApp {
         });
         
         this.updateStampCounter();
-        this.updateConnectionLines();
     }
 
     // 부스 클릭 이벤트 등록
@@ -138,9 +137,6 @@ class StampTourApp {
         // 카운터 업데이트
         this.updateStampCounter();
         
-        // 연결선 업데이트
-        this.updateConnectionLines();
-        
         // 모든 스탬프를 모았는지 확인
         this.checkCompletion();
     }
@@ -162,23 +158,6 @@ class StampTourApp {
         const stamps = StorageManager.getStampStatus();
         const count = Object.values(stamps).filter(v => v === true).length;
         this.stampCount.textContent = count;
-    }
-
-    // 연결선 업데이트 (스탬프 찍힌 부스 간 연결선 활성화)
-    updateConnectionLines() {
-        const stamps = StorageManager.getStampStatus();
-        
-        for (let i = 1; i <= 9; i++) {
-            const currentBooth = `booth${i}`;
-            const nextBooth = `booth${i + 1}`;
-            const line = document.getElementById(`line${i}`);
-            
-            if (stamps[currentBooth] && stamps[nextBooth]) {
-                line.classList.add('active');
-            } else {
-                line.classList.remove('active');
-            }
-        }
     }
 
     // 모든 스탬프 완료 확인

@@ -133,29 +133,6 @@ header h1 {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
-.connections {
-    position: absolute;
-    top: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    height: calc(100% - 60px);
-    pointer-events: none;
-    z-index: 1;
-}
-
-.connection-line {
-    stroke: #e0e0e0;
-    stroke-width: 4;
-    fill: none;
-    stroke-linecap: round;
-    transition: stroke 0.3s ease;
-}
-
-.connection-line.active {
-    stroke: #667eea;
-    stroke-width: 5;
-}
 
 .booth {
     position: absolute;
@@ -223,6 +200,8 @@ header h1 {
     color: #666;
     font-weight: 600;
     transition: color 0.3s ease;
+    margin-top: 5px;
+    text-align: center;
 }
 
 .booth.stamped .booth-label {
@@ -323,6 +302,17 @@ header h1 {
 
 /* 반응형 디자인 */
 @media (max-width: 375px) {
+    .roadmap {
+        gap: 30px 20px;
+        padding: 30px 20px;
+        min-height: 700px;
+}
+
+
+.booth {
+        max-width: 120px;
+    }
+    
     .header-banner {
         height: 100px;
     }
