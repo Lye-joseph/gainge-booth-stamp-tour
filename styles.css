@@ -123,7 +123,7 @@ header h1 {
 .stamp-icon {
     position: absolute;
     font-size: 48px;
-    color: #4caf50;
+    color: #73FFFF;
     opacity: 0;
     transition: opacity 0.3s ease;
     top: 50%;
