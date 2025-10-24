@@ -92,7 +92,11 @@ class StampTourApp {
                 
                 // 이미 스탬프가 찍힌 부스인지 확인
                 if (booth.classList.contains('stamped')) {
-                    alert('이미 스탬프를 찍은 부스입니다! 😊');
+                    // 현재 완료된 부스 개수 계산
+                    const stamps = StorageManager.getStampStatus();
+                    const completedCount = Object.values(stamps).filter(v => v === true).length;
+                    
+                    alert(`이미 스탬프를 찍은 부스입니다! 😊\n\n현재 ${completedCount}/10번째 부스 완료했습니다.`);
                     return;
                 }
                 
@@ -206,7 +210,14 @@ class StampTourApp {
                 // 자동으로 스탬프 찍기
                 setTimeout(() => {
                     this.stampBooth(boothId);
-                    alert(`부스 ${boothParam} 스탬프가 자동으로 찍혔습니다! 🎉`);
+                    
+                    // 현재 완료된 부스 개수 계산
+                    const stamps = StorageManager.getStampStatus();
+                    const completedCount = Object.values(stamps).filter(v => v === true).length;
+                    
+                    // 알림 메시지 생성
+                    const message = `부스 ${boothParam} 스탬프가 자동으로 찍혔습니다! 🎉\n\n현재 ${completedCount}/10번째 부스 완료했습니다.`;
+                    alert(message);
                 }, 500);
             }
         }
