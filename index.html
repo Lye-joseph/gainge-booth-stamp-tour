@@ -22,6 +22,30 @@
             <span id="stampCount">0</span> / 11 완료
         </div>
 
+        <!-- 상품수령 정보 등록 섹션 (카운터 아래, 로드맵 위) -->
+        <div class="reward-section" id="rewardSection">
+            <div class="reward-card">
+                <h3>🏆 부스 스탬프 투어 이벤트</h3>
+                <div class="reward-info">
+                    <div class="reward-item">
+                        <span class="reward-count">7개 이상(선착순 50명)</span>
+                        <span class="reward-gift">에너지 드링크 기프티콘</span>
+                    </div>
+                    <div class="reward-item">
+                        <span class="reward-count">9개 이상(선착순 10명)</span>
+                        <span class="reward-gift">커피 기프티콘</span>
+                    </div>
+                    <div class="reward-item">
+                        <span class="reward-count">11개 완주(선착순 5명)</span>
+                        <span class="reward-gift">치킨 기프티콘</span>
+                    </div>
+                </div>
+                <button class="reward-btn" id="rewardBtn" disabled>상품수령 정보 등록하기</button>
+            </div>
+        </div>
+
+        
+
         <div class="roadmap">
             <!-- 부스 1 -->
             <div class="booth" data-booth-id="booth1" style="top: 20px;">
@@ -134,6 +158,8 @@
             </div>
         </div>
 
+        
+
         <!-- 카메라 입력 (숨김) -->
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
 
@@ -144,6 +170,34 @@
                 <h2>🎉 축하합니다!</h2>
                 <p class="completion-message">모든 11개 부스의 스탬프를 모았습니다!</p>
                 <p class="completion-subtitle">스탬프 투어를 완주하셨습니다! 🎊</p>
+            </div>
+        </div>
+
+        <!-- 상품수령 정보 입력 모달 -->
+        <div id="rewardModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🏆 상품수령 정보 등록</h2>
+                    <button class="close-btn" id="closeRewardModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="reward-level" id="rewardLevel"></div>
+                    <form id="rewardForm">
+                        <div class="form-group">
+                            <label for="userName">이름 *</label>
+                            <input type="text" id="userName" name="userName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="companyName">회사명 *</label>
+                            <input type="text" id="companyName" name="companyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phoneNumber">연락처 *</label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="010-1234-5678">
+                        </div>
+                        <button type="submit" class="submit-btn">정보 등록하기</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
