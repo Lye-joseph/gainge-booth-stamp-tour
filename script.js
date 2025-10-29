@@ -95,7 +95,7 @@ class StampTourApp {
                     const stamps = StorageManager.getStampStatus();
                     const completedCount = Object.values(stamps).filter(v => v === true).length;
                     
-                    alert(`이미 스탬프를 찍은 부스입니다! 😊\n\n현재 ${completedCount}/10번째 부스 완료했습니다.`);
+                    alert(`이미 스탬프를 찍은 부스입니다! 😊\n\n현재 ${completedCount}/11번째 부스 완료했습니다.`);
                     return;
                 }
                 
@@ -165,7 +165,7 @@ class StampTourApp {
         const stamps = StorageManager.getStampStatus();
         const completedCount = Object.values(stamps).filter(v => v === true).length;
         
-        if (completedCount === 10) {
+        if (completedCount === 11) {
             setTimeout(() => {
                 this.completeModal.classList.add('show');
                 // 완료 후에는 모달을 자동으로 닫지 않음 (영구 축하 화면)
@@ -195,7 +195,7 @@ class StampTourApp {
                     const completedCount = Object.values(stamps).filter(v => v === true).length;
                     
                     // 알림 메시지 생성
-                    const message = `부스 ${boothParam} 스탬프가 자동으로 찍혔습니다! 🎉\n\n현재 ${completedCount}/10번째 부스 완료했습니다.`;
+                    const message = `부스 ${boothParam} 스탬프가 자동으로 찍혔습니다! 🎉\n\n현재 ${completedCount}/11번째 부스 완료했습니다.`;
                     alert(message);
                 }, 500);
             }
