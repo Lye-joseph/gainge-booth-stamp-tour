@@ -151,20 +151,20 @@ header h1 {
 }
 
 .reward-btn:disabled {
-    background: #cfcfd9;
-    color: #888;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: #cfcfd9 !important;
+    color: #888 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     cursor: not-allowed;
-    transform: none;
+    transform: none !important;
 }
 
-.reward-btn:hover {
+.reward-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, #283593 0%, #3949ab 100%);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
 }
 
-.reward-btn:active {
+.reward-btn:active:not(:disabled) {
     transform: translateY(0);
     box-shadow: 0 4px 15px rgba(26, 35, 126, 0.3);
 }
@@ -241,8 +241,8 @@ header h1 {
 
 
 .booth.stamped .stamp-icon {
-    opacity: 0;
-    display: none;
+    opacity: 1;
+    display: block;
 }
 
 .booth-label {
