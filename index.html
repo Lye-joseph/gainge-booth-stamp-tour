@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>부스 스탬프 투어</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
+        <!-- 개발 모드 초기화 버튼 ( ?dev=1 일 때 표시 ) -->
+        <button id="devResetBtn" class="dev-reset-btn" style="display:none;">테스트 초기화</button>
         <!-- 헤더 배너 -->
         <div class="header-banner">
             <img src="header-banner.png" alt="기술을 넘어 다시 사람으로" class="banner-image">
@@ -43,8 +47,6 @@
                 <button class="reward-btn" id="rewardBtn" disabled>상품수령 정보 등록하기</button>
             </div>
         </div>
-
-        
 
         <div class="roadmap">
             <!-- 부스 1 -->
@@ -158,8 +160,6 @@
             </div>
         </div>
 
-        
-
         <!-- 카메라 입력 (숨김) -->
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
 
@@ -167,6 +167,7 @@
         <div id="completeModal" class="modal">
             <div class="modal-content">
                 <div class="completion-icon">🏆</div>
+                <button class="close-icon-btn" id="closeCompleteModal">×</button>
                 <h2>🎉 축하합니다!</h2>
                 <p class="completion-message">모든 11개 부스의 스탬프를 모았습니다!</p>
                 <p class="completion-subtitle">스탬프 투어를 완주하셨습니다! 🎊</p>
@@ -202,7 +203,8 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
+    <script src="./script.js"></script>
 
+</body>
+
+</html>

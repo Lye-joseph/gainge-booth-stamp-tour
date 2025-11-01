@@ -1,51 +1,213 @@
-// 스탬프 상태 관리 (localStorage 사용)
-const StorageManager = {
+/**
+ * 부스 스탬프 투어 앱
+ * - 스탬프는 로컬(localStorage)에 저장
+ * - 리워드 신청은 Google Apps Script를 통해 서버에 제출
+ */
+
+// ==================== 설정 ====================
+// Google Apps Script Web App URL (배포 후 여기에 입력)
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwmP__E4IAFbjsa8PAsvciSHR4l5EWrSsbH4HcqEkOLbb_JgaoD6-uQMh2ffaSss9l5/exec';
+
+// 리워드 한도 (Apps Script와 동일하게 유지)
+const REWARD_LIMITS = {
+    tier11: 5,   // 치킨 (11개 완주)
+    tier9: 10,   // 커피 (9개 이상)
+    tier7: 50    // 에너지드링크 (7개 이상)
+};
+
+// ==================== 유틸리티 함수 ====================
+
+function getWebAppUrl() {
+    if (WEB_APP_URL === 'YOUR_WEB_APP_URL_HERE') {
+        console.warn('Web App URL이 설정되지 않았습니다. apps-script.js를 배포하고 URL을 입력하세요.');
+    }
+    return WEB_APP_URL;
+}
+
+// ==================== 스탬프 관리 (localStorage) ====================
+
+const StampStorage = {
     STORAGE_KEY: 'boothStamps',
-    
-    // localStorage에서 스탬프 상태 가져오기
-    getStampStatus() {
+
+    // 스탬프 상태 가져오기
+    getStamps() {
         try {
             const data = localStorage.getItem(this.STORAGE_KEY);
-            if (data) {
-                return JSON.parse(data);
-            }
+            return data ? JSON.parse(data) : {};
         } catch (e) {
-            console.error('스탬프 상태 불러오기 실패:', e);
+            console.error('스탬프 불러오기 실패:', e);
+            return {};
         }
-        return {};
     },
 
-    // localStorage에 스탬프 상태 저장하기
-    setStampStatus(boothId, isStamped) {
+    // 스탬프 저장
+    setStamp(boothId, isStamped) {
         try {
-            const stamps = this.getStampStatus();
+            const stamps = this.getStamps();
             stamps[boothId] = isStamped;
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(stamps));
-            console.log('스탬프 저장됨:', stamps);
             return stamps;
         } catch (e) {
-            console.error('스탬프 상태 저장 실패:', e);
+            console.error('스탬프 저장 실패:', e);
             return {};
         }
     },
 
     // 모든 스탬프 초기화
-    resetAllStamps() {
+    reset() {
         try {
             localStorage.removeItem(this.STORAGE_KEY);
-            console.log('모든 스탬프 초기화됨');
+            console.log('스탬프 초기화됨');
         } catch (e) {
             console.error('스탬프 초기화 실패:', e);
+        }
+    },
+
+    // 완료된 스탬프 개수
+    getCompletedCount() {
+        const stamps = this.getStamps();
+        return Object.values(stamps).filter(v => v === true).length;
+    }
+};
+
+// ==================== 리워드 제출 상태 관리 (localStorage) ====================
+
+const RewardStorage = {
+    STORAGE_KEY: 'rewardSubmitted',
+
+    // 제출 완료 여부 확인
+    isSubmitted() {
+        try {
+            const data = localStorage.getItem(this.STORAGE_KEY);
+            return data === 'true';
+        } catch (e) {
+            console.error('제출 상태 확인 실패:', e);
+            return false;
+        }
+    },
+
+    // 제출 완료로 표시
+    markAsSubmitted() {
+        try {
+            localStorage.setItem(this.STORAGE_KEY, 'true');
+            console.log('리워드 제출 완료 상태로 저장됨');
+        } catch (e) {
+            console.error('제출 상태 저장 실패:', e);
+        }
+    },
+
+    // 제출 상태 초기화 (개발 모드용)
+    reset() {
+        try {
+            localStorage.removeItem(this.STORAGE_KEY);
+            console.log('리워드 제출 상태 초기화됨');
+        } catch (e) {
+            console.error('제출 상태 초기화 실패:', e);
         }
     }
 };
 
-// 앱 초기화
+// ==================== 카메라 관리 ====================
+
+class CameraManager {
+    constructor(inputElement) {
+        this.input = inputElement;
+    }
+
+    open() {
+        this.input.click();
+    }
+
+    reset() {
+        this.input.value = '';
+    }
+}
+
+// ==================== API 통신 ====================
+
+/**
+ * 전체 제출 목록 조회
+ */
+async function fetchAllSubmissions() {
+    try {
+        const url = getWebAppUrl() + '?action=list';
+        const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+        const json = await res.json();
+        if (json && json.ok && Array.isArray(json.rows)) {
+            return json.rows;
+        }
+    } catch (e) {
+        console.warn('시트 목록 조회 실패:', e);
+    }
+    return [];
+}
+
+/**
+ * 남은 수량 조회
+ */
+async function fetchRemainingCounts() {
+    try {
+        const url = getWebAppUrl() + '?action=remaining';
+        const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+        const json = await res.json();
+        if (json && json.ok && json.remaining) {
+            return json.remaining;
+        }
+    } catch (e) {
+        console.warn('남은 수량 조회 실패:', e);
+    }
+    return null;
+}
+
+/**
+ * 목록 기반 남은 수량 계산 (fallback)
+ */
+function calcRemainingFromList(rows) {
+    const counts = { tier11: 0, tier9: 0, tier7: 0 };
+    for (const r of rows) {
+        const lv = (r.rewardLevel || '').trim();
+        if (lv === '치킨') counts.tier11++;
+        else if (lv === '커피') counts.tier9++;
+        else if (lv === '에너지드링크') counts.tier7++;
+    }
+    return {
+        tier11: Math.max(0, REWARD_LIMITS.tier11 - counts.tier11),
+        tier9: Math.max(0, REWARD_LIMITS.tier9 - counts.tier9),
+        tier7: Math.max(0, REWARD_LIMITS.tier7 - counts.tier7)
+    };
+}
+
+/**
+ * 리워드 신청 제출
+ */
+async function submitReward(data) {
+    try {
+        const url = getWebAppUrl();
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            mode: 'no-cors' // CORS 이슈 방지
+        });
+
+        // no-cors 모드에서는 응답을 읽을 수 없으므로, 항상 성공으로 간주
+        // 실제 검증은 제출 전에 수행
+        return { ok: true };
+    } catch (err) {
+        console.warn('웹앱 전송 실패:', err);
+        // 로컬 백업 저장
+        const submissions = JSON.parse(localStorage.getItem('rewardSubmissions') || '[]');
+        submissions.push({ ...data, fallbackSaved: true, timestamp: new Date().toISOString() });
+        localStorage.setItem('rewardSubmissions', JSON.stringify(submissions));
+        throw err;
+    }
+}
+
+// ==================== 메인 앱 클래스 ====================
+
 class StampTourApp {
     constructor() {
-        this.currentBoothId = null;
-        this.cameraInput = document.getElementById('cameraInput');
-        this.completeModal = document.getElementById('completeModal');
+        // DOM 요소
         this.stampCount = document.getElementById('stampCount');
         this.rewardSection = document.getElementById('rewardSection');
         this.rewardBtn = document.getElementById('rewardBtn');
@@ -53,168 +215,120 @@ class StampTourApp {
         this.closeRewardModal = document.getElementById('closeRewardModal');
         this.rewardForm = document.getElementById('rewardForm');
         this.rewardLevel = document.getElementById('rewardLevel');
+        this.completeModal = document.getElementById('completeModal');
+        this.closeCompleteModalBtn = document.getElementById('closeCompleteModal');
+        this.devResetBtn = document.getElementById('devResetBtn');
+        this.cameraInput = document.getElementById('cameraInput');
+
+        // 상태
+        this.currentBoothId = null;
         this.assignedTier = null; // 11 | 9 | 7
-        
+        this.camera = new CameraManager(this.cameraInput);
+
         this.init();
     }
 
     init() {
-        // URL 파라미터로 초기화 처리 (?reset=1)
+        // URL 파라미터 처리
         this.handleResetParam();
+        this.handleDevMode();
 
-        // 페이지 로드 시 쿠키에서 스탬프 상태 복원
+        // 스탬프 상태 복원
         this.loadStampStatus();
-        
-        // 선착순 재고 초기화
-        this.initializeQuotas();
 
-        // 부스 클릭 이벤트 등록
+        // 이벤트 등록
         this.attachBoothClickEvents();
-        
-        // 카메라 입력 이벤트 등록
         this.attachCameraEvent();
-        
-        // URL path 기반 자동 스탬프 처리
-        this.handlePathBasedStamp();
-        
-        // 상품수령 정보 등록 이벤트 등록
         this.attachRewardEvents();
+        this.attachPathBasedStamp();
+        this.attachCompleteModal();
+
+        // 초기 UI 업데이트
+        this.updateStampCounter();
+        this.checkRewardEligibility();
     }
 
-    // URL 파라미터 reset=1 이면 모든 스탬프 초기화
+    // URL 파라미터: reset=1 이면 스탬프 초기화
     handleResetParam() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const reset = urlParams.get('reset');
-        if (reset === '1') {
-            StorageManager.resetAllStamps();
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('reset') === '1') {
+            StampStorage.reset();
+            RewardStorage.reset(); // 리워드 제출 상태도 초기화
+            localStorage.removeItem('rewardSubmissions');
+            location.replace(window.location.pathname);
         }
     }
 
-    // 선착순 재고 초기화 (없을 때만)
-    initializeQuotas() {
-        const defaultQuotas = { tier11: 5, tier9: 10, tier7: 50 };
-        const raw = localStorage.getItem('rewardQuotas');
-        if (!raw) {
-            localStorage.setItem('rewardQuotas', JSON.stringify(defaultQuotas));
+    // 개발 모드: ?dev=1
+    handleDevMode() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('dev') === '1' && this.devResetBtn) {
+            this.devResetBtn.style.display = 'inline-block';
+            this.devResetBtn.addEventListener('click', () => this.resetAllData());
         }
     }
 
-    getQuotas() {
-        try {
-            return JSON.parse(localStorage.getItem('rewardQuotas') || '{"tier11":5,"tier9":10,"tier7":50}');
-        } catch (_) {
-            return { tier11: 5, tier9: 10, tier7: 50 };
-        }
-    }
-
-    setQuotas(q) {
-        localStorage.setItem('rewardQuotas', JSON.stringify(q));
-    }
-
-    getEligibleTier(count) {
-        if (count >= 11) return 11;
-        if (count >= 9) return 9;
-        if (count >= 7) return 7;
-        return null;
-    }
-
-    getNextAvailableTier(count) {
-        const quotas = this.getQuotas();
-        const eligible = this.getEligibleTier(count);
-        const order = [11, 9, 7];
-        const startIdx = eligible ? order.indexOf(eligible) : -1;
-        const scan = startIdx >= 0 ? order.slice(startIdx) : order; // if not eligible, scan all
-        for (const tier of scan) {
-            const key = tier === 11 ? 'tier11' : tier === 9 ? 'tier9' : 'tier7';
-            if (quotas[key] > 0) return tier;
-        }
-        return null;
-    }
-
-    // localStorage에서 스탬프 상태 불러와서 UI 업데이트
+    // 스탬프 상태 로드 및 UI 업데이트
     loadStampStatus() {
-        const stamps = StorageManager.getStampStatus();
-        console.log('불러온 스탬프:', stamps);
+        const stamps = StampStorage.getStamps();
         const booths = document.querySelectorAll('.booth');
-        
+
         booths.forEach(booth => {
             const boothId = booth.getAttribute('data-booth-id');
             if (stamps[boothId]) {
                 this.markBoothAsStamped(booth, false);
             }
         });
-        
-        this.updateStampCounter();
-        this.checkRewardEligibility();
     }
 
-    // 부스 클릭 이벤트 등록
+    // 부스 클릭 이벤트
     attachBoothClickEvents() {
         const booths = document.querySelectorAll('.booth');
-        
+
         booths.forEach(booth => {
             booth.addEventListener('click', () => {
                 this.currentBoothId = booth.getAttribute('data-booth-id');
-                
+
                 // 이미 스탬프가 찍힌 부스인지 확인
                 if (booth.classList.contains('stamped')) {
-                    // 현재 완료된 부스 개수 계산
-                    const stamps = StorageManager.getStampStatus();
-                    const completedCount = Object.values(stamps).filter(v => v === true).length;
-                    
+                    const completedCount = StampStorage.getCompletedCount();
                     alert(`이미 스탬프를 찍은 부스입니다! 😊\n\n현재 ${completedCount}/11번째 부스 완료했습니다.`);
                     return;
                 }
-                
+
                 // 카메라 실행
-                this.openCamera();
+                this.camera.open();
             });
         });
-    }
-
-    // 카메라 열기
-    openCamera() {
-        this.cameraInput.click();
     }
 
     // 카메라 입력 이벤트
     attachCameraEvent() {
         this.cameraInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0] && this.currentBoothId) {
-                // 사진이 선택되면 스탬프 찍기
                 this.stampBooth(this.currentBoothId);
-                
-                // 파일 입력 초기화
-                this.cameraInput.value = '';
+                this.camera.reset();
             }
         });
     }
 
     // 부스에 스탬프 찍기
     stampBooth(boothId) {
-        // localStorage에 저장
-        StorageManager.setStampStatus(boothId, true);
-        
-        // UI 업데이트
+        StampStorage.setStamp(boothId, true);
+
         const booth = document.querySelector(`[data-booth-id="${boothId}"]`);
         if (booth) {
             this.markBoothAsStamped(booth, true);
         }
-        
-        // 카운터 업데이트
+
         this.updateStampCounter();
-        
-        // 상품수령 자격 확인
         this.checkRewardEligibility();
-        
-        // 모든 스탬프를 모았는지 확인
         this.checkCompletion();
     }
 
     // 부스를 스탬프 찍힌 상태로 표시
     markBoothAsStamped(booth, animate = true) {
         booth.classList.add('stamped');
-        
         if (animate) {
             booth.classList.add('just-stamped');
             setTimeout(() => {
@@ -225,48 +339,43 @@ class StampTourApp {
 
     // 스탬프 카운터 업데이트
     updateStampCounter() {
-        const stamps = StorageManager.getStampStatus();
-        const count = Object.values(stamps).filter(v => v === true).length;
+        const count = StampStorage.getCompletedCount();
         this.stampCount.textContent = count;
     }
 
     // 모든 스탬프 완료 확인
     checkCompletion() {
-        const stamps = StorageManager.getStampStatus();
-        const completedCount = Object.values(stamps).filter(v => v === true).length;
-        
+        const completedCount = StampStorage.getCompletedCount();
         if (completedCount === 11) {
             setTimeout(() => {
                 this.completeModal.classList.add('show');
-                // 완료 후에는 모달을 자동으로 닫지 않음 (영구 축하 화면)
             }, 500);
         }
     }
 
+    // 완료 모달 닫기
+    attachCompleteModal() {
+        if (this.closeCompleteModalBtn) {
+            this.closeCompleteModalBtn.addEventListener('click', () => {
+                this.completeModal.classList.remove('show');
+            });
+        }
+    }
 
-    // URL 파라미터 기반 자동 스탬프 처리 (?booth=3)
-    handlePathBasedStamp() {
-        // URL 파라미터 확인 (?booth=3)
-        const urlParams = new URLSearchParams(window.location.search);
-        const boothParam = urlParams.get('booth');
-        
+    // URL 파라미터 기반 자동 스탬프 (?booth=3)
+    attachPathBasedStamp() {
+        const params = new URLSearchParams(window.location.search);
+        const boothParam = params.get('booth');
+
         if (boothParam) {
             const boothId = `booth${boothParam}`;
-            
-            // 해당 부스가 존재하는지 확인
             const booth = document.querySelector(`[data-booth-id="${boothId}"]`);
+
             if (booth && !booth.classList.contains('stamped')) {
-                // 자동으로 스탬프 찍기
                 setTimeout(() => {
                     this.stampBooth(boothId);
-                    
-                    // 현재 완료된 부스 개수 계산
-                    const stamps = StorageManager.getStampStatus();
-                    const completedCount = Object.values(stamps).filter(v => v === true).length;
-                    
-                    // 알림 메시지 생성
-                    const message = `부스 ${boothParam} 스탬프가 자동으로 찍혔습니다! 🎉\n\n현재 ${completedCount}/11번째 부스 완료했습니다.`;
-                    alert(message);
+                    const completedCount = StampStorage.getCompletedCount();
+                    alert(`부스 ${boothParam} 스탬프가 자동으로 찍혔습니다! 🎉\n\n현재 ${completedCount}/11번째 부스 완료했습니다.`);
                 }, 500);
             }
         }
@@ -274,18 +383,38 @@ class StampTourApp {
 
     // 상품수령 자격 확인
     checkRewardEligibility() {
-        const stamps = StorageManager.getStampStatus();
-        const completedCount = Object.values(stamps).filter(v => v === true).length;
-        
-        // 항상 표시하되, 7개 미만일 때 버튼 비활성화
+        const completedCount = StampStorage.getCompletedCount();
+        const isSubmitted = RewardStorage.isSubmitted();
+
+        console.log('상품수령 자격 확인:', { completedCount, isSubmitted });
+
         this.rewardSection.style.display = 'block';
-        const shouldDisable = completedCount < 7;
-        this.rewardBtn.disabled = shouldDisable;
+        // 스탬프 7개 미만이거나 이미 제출한 경우 버튼 비활성화
+        this.rewardBtn.disabled = completedCount < 7 || isSubmitted;
+
+        // 이미 제출한 경우 버튼 텍스트 변경
+        if (isSubmitted) {
+            this.rewardBtn.textContent = '이미 상품수령 정보를 등록하셨습니다';
+        } else {
+            this.rewardBtn.textContent = '상품수령 정보 등록하기';
+        }
     }
 
-    // 상품수령 정보 등록 이벤트 등록
+    // 자격 있는 티어 계산
+    getEligibleTier(count) {
+        if (count >= 11) return 11;
+        if (count >= 9) return 9;
+        if (count >= 7) return 7;
+        return null;
+    }
+
+    // 상품수령 이벤트 등록
     attachRewardEvents() {
         this.rewardBtn.addEventListener('click', () => {
+            // 버튼이 비활성화되어 있거나 이미 제출한 경우 클릭 무시
+            if (this.rewardBtn.disabled || RewardStorage.isSubmitted()) {
+                return;
+            }
             this.openRewardModal();
         });
 
@@ -307,34 +436,65 @@ class StampTourApp {
     }
 
     // 상품수령 모달 열기
-    openRewardModal() {
-        const stamps = StorageManager.getStampStatus();
-        const completedCount = Object.values(stamps).filter(v => v === true).length;
-        
+    async openRewardModal() {
+        // 이미 제출한 경우 모달 열기 방지
+        if (RewardStorage.isSubmitted()) {
+            alert('이미 상품수령 정보를 등록하셨습니다.\n한 기기당 한 번만 신청 가능합니다.');
+            return;
+        }
+
+        const completedCount = StampStorage.getCompletedCount();
         const eligibleTier = this.getEligibleTier(completedCount);
-        const nextTier = this.getNextAvailableTier(completedCount);
+
+        // 남은 수량 조회
+        let remaining = await fetchRemainingCounts();
+
+        // fallback: 목록 기반 계산
+        if (!remaining) {
+            const rows = await fetchAllSubmissions();
+            remaining = calcRemainingFromList(rows);
+        }
+
+        if (!remaining) {
+            alert('시트 목록 조회에 실패했습니다. 네트워크 상태를 확인 후 다시 시도해주세요.');
+            return;
+        }
+
+        // 사용 가능한 티어 결정
+        let nextTier;
+        const order = [11, 9, 7];
+        const startIdx = eligibleTier ? order.indexOf(eligibleTier) : -1;
+        const scan = startIdx >= 0 ? order.slice(startIdx) : order;
+
+        for (const tier of scan) {
+            const key = tier === 11 ? 'tier11' : tier === 9 ? 'tier9' : 'tier7';
+            if ((remaining[key] || 0) > 0) {
+                nextTier = tier;
+                break;
+            }
+        }
 
         if (!nextTier) {
             alert('스탬프 투어에 참여해주셔서 감사합니다!\n아쉽게도 선착순 이벤트가 모두 종료되었습니다.');
             return;
         }
 
-        // 안내 팝업: 상위 등급 마감 시 다운그레이드 안내
+        // 티어 변경 알림
         if (eligibleTier && nextTier !== eligibleTier) {
             if (eligibleTier === 11) {
-                alert('11개 완주자 상품 수령 선착순 5명 등록이 마감되었습니다.\n9개 이상 상품 수령 등록으로 안내드립니다.');
+                alert('11개 완주자 상품 수령 선착순 등록이 마감되었습니다.\n9개 이상 상품 수령 등록으로 안내드립니다.');
             } else if (eligibleTier === 9) {
-                alert('9개 이상 상품 수령 선착순 10명 등록이 마감되었습니다.\n7개 이상 상품 수령 등록으로 안내드립니다.');
+                alert('9개 이상 상품 수령 선착순 등록이 마감되었습니다.\n7개 이상 상품 수령 등록으로 안내드립니다.');
             }
         }
 
-        this.assignedTier = nextTier; // 제출 시 사용할 티어
-        let rewardText = '';
-        if (nextTier === 11) rewardText = '🎉 11개 완주 - 치킨 기프티콘 수령';
-        else if (nextTier === 9) rewardText = '☕ 9개 이상 - 커피 기프티콘 수령';
-        else if (nextTier === 7) rewardText = '⚡ 7개 이상 - 에너지 드링크 기프티콘 수령';
+        this.assignedTier = nextTier;
+        let rewardHtml = '';
+        if (nextTier === 11) rewardHtml = '🎉 11개 완주<br>- 치킨 기프티콘 수령';
+        else if (nextTier === 9) rewardHtml = '☕ 9개 이상<br>- 커피 기프티콘 수령';
+        else if (nextTier === 7) rewardHtml = '⚡ 7개 이상<br>- 에너지 드링크 기프티콘 수령';
 
-        this.rewardLevel.textContent = rewardText;
+        this.rewardLevel.innerHTML = rewardHtml;
         this.rewardModal.classList.add('show');
     }
 
@@ -342,18 +502,37 @@ class StampTourApp {
     closeRewardModalFunc() {
         this.rewardModal.classList.remove('show');
         this.rewardForm.reset();
+        this.assignedTier = null;
     }
 
     // 상품수령 정보 제출
     async submitRewardForm() {
+        // 이미 제출한 경우 제출 방지
+        if (RewardStorage.isSubmitted()) {
+            alert('이미 상품수령 정보를 등록하셨습니다.\n한 기기당 한 번만 신청 가능합니다.');
+            this.closeRewardModalFunc();
+            return;
+        }
+
         const formData = new FormData(this.rewardForm);
-        const stamps = StorageManager.getStampStatus();
-        const completedCount = Object.values(stamps).filter(v => v === true).length;
-        
-        // assignedTier가 없거나, 제출 시점에 재고가 없으면 방어
-        const nextTier = this.getNextAvailableTier(completedCount);
-        if (!this.assignedTier || this.assignedTier !== nextTier) {
-            alert('제출 중 재고가 변경되었습니다. 다시 시도해주세요.');
+        const completedCount = StampStorage.getCompletedCount();
+
+        // 제출 직전 재고 재검증
+        let remaining = await fetchRemainingCounts();
+        if (!remaining) {
+            const rows = await fetchAllSubmissions();
+            remaining = calcRemainingFromList(rows);
+        }
+
+        if (!remaining) {
+            alert('시트 목록 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');
+            this.closeRewardModalFunc();
+            return;
+        }
+
+        const key = this.assignedTier === 11 ? 'tier11' : this.assignedTier === 9 ? 'tier9' : 'tier7';
+        if (!this.assignedTier || (remaining[key] || 0) <= 0) {
+            alert('제출 직전에 재고가 소진되었습니다. 다시 열어 확인해주세요.');
             this.closeRewardModalFunc();
             return;
         }
@@ -368,16 +547,16 @@ class StampTourApp {
         };
 
         try {
-            // 재고 차감
-            const quotas = this.getQuotas();
-            const key = this.assignedTier === 11 ? 'tier11' : this.assignedTier === 9 ? 'tier9' : 'tier7';
-            quotas[key] = Math.max(0, (quotas[key] || 0) - 1);
-            this.setQuotas(quotas);
+            await submitReward(rewardData);
 
-            // 구글 시트에 데이터 전송 (추후 구현)
-            await this.submitToGoogleSheets(rewardData);
-            
-            alert('상품수령 정보가 성공적으로 등록되었습니다! 🎉\n\n곧 연락드리겠습니다.');
+            // 제출 완료 상태로 표시
+            RewardStorage.markAsSubmitted();
+            console.log('리워드 제출 완료 상태 저장됨');
+
+            // UI 업데이트 (버튼 비활성화)
+            this.checkRewardEligibility();
+
+            alert('상품수령 정보가 성공적으로 등록되었습니다! 🎉\n\n부스 스탬프 투어 리워드는 일주일 내로 지급 예정입니다.');
             this.closeRewardModalFunc();
         } catch (error) {
             console.error('상품수령 정보 등록 실패:', error);
@@ -385,27 +564,35 @@ class StampTourApp {
         }
     }
 
-    // 구글 시트에 데이터 전송 (Apps Script Web App 사용)
-    async submitToGoogleSheets(data) {
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxQ32yHv2mOpxH8tQ294uxy1DlwOaw25FgTLVkmTGNxQ_dFPXBbAaYCJH-NxILThfLh/exec';
-        try {
-            await fetch(WEB_APP_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-                mode: 'no-cors'
-            });
-        } catch (err) {
-            console.warn('웹앱 전송 실패, 로컬 백업에 저장합니다:', err);
-            const submissions = JSON.parse(localStorage.getItem('rewardSubmissions') || '[]');
-            submissions.push({ ...data, fallbackSaved: true });
-            localStorage.setItem('rewardSubmissions', JSON.stringify(submissions));
-        }
+    // 전체 데이터 초기화 (테스트용)
+    resetAllData() {
+        StampStorage.reset();
+        RewardStorage.reset(); // 리워드 제출 상태도 초기화
+        localStorage.removeItem('rewardSubmissions');
+
+        document.querySelectorAll('.booth').forEach(booth => {
+            booth.classList.remove('stamped', 'just-stamped');
+        });
+
+        this.updateStampCounter();
+        this.checkRewardEligibility();
+        this.completeModal.classList.remove('show');
+        alert('테스트 데이터가 초기화되었습니다.\n리워드 제출 상태도 초기화되어 다시 신청할 수 있습니다.');
     }
 }
 
-// 앱 시작
+// 기업 소개 버튼 이벤트 (목업)
 document.addEventListener('DOMContentLoaded', () => {
-    new StampTourApp();
+    const app = new StampTourApp();
+
+    // 기업 소개 버튼 클릭 이벤트
+    document.querySelectorAll('.company-intro-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // 부스 클릭 이벤트 방지
+            const booth = btn.getAttribute('data-booth');
+            // TODO: 실제 URL로 교체 예정
+            alert(`부스 ${booth} 기업 소개 페이지\n\n(실제 URL이 준비되면 연결됩니다.)`);
+        });
+    });
 });
 
