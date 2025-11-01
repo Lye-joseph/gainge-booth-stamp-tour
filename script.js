@@ -76,14 +76,16 @@ const RewardStorage = {
     STORAGE_KEY: 'rewardSubmitted',
 
     // 제출 완료 여부 확인
+    // 테스트를 위해 임시로 제한 해제 (항상 false 반환)
     isSubmitted() {
-        try {
-            const data = localStorage.getItem(this.STORAGE_KEY);
-            return data === 'true';
-        } catch (e) {
-            console.error('제출 상태 확인 실패:', e);
-            return false;
-        }
+        return false; // 테스트용: 제출 제한 해제
+        // try {
+        //     const data = localStorage.getItem(this.STORAGE_KEY);
+        //     return data === 'true';
+        // } catch (e) {
+        //     console.error('제출 상태 확인 실패:', e);
+        //     return false;
+        // }
     },
 
     // 제출 완료로 표시
