@@ -592,8 +592,19 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation(); // 부스 클릭 이벤트 방지
             const booth = btn.getAttribute('data-booth');
-            // TODO: 실제 URL로 교체 예정
-            alert(`부스 ${booth} 기업 소개 페이지\n\n(실제 URL이 준비되면 연결됩니다.)`);
+
+            // 부스별 링크 설정
+            const companyLinks = {
+                '9': 'https://tigris.cloud/tigris-ai-plus' // (주)타이거컴퍼니
+            };
+
+            // 링크가 있는 경우 새 탭에서 열기
+            if (companyLinks[booth]) {
+                window.open(companyLinks[booth], '_blank');
+            } else {
+                // 아직 링크가 없는 경우 알림 표시
+                alert(`부스 ${booth} 기업 소개 페이지\n\n(실제 URL이 준비되면 연결됩니다.)`);
+            }
         });
     });
 });
