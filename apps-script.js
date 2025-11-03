@@ -112,11 +112,11 @@ function doPost(e) {
         const data = JSON.parse(e.postData.contents);
 
         // 필수 필드 검증
-        if (!data.name || !data.company || !data.phone || !data.rewardLevel) {
+        if (!data.name || !data.company || !data.phone || !data.email || !data.rewardLevel) {
             return ContentService.createTextOutput(
                 JSON.stringify({
                     ok: false,
-                    error: '필수 필드가 누락되었습니다. (name, company, phone, rewardLevel)'
+                    error: '필수 필드가 누락되었습니다. (name, company, phone, email, rewardLevel)'
                 })
             ).setMimeType(ContentService.MimeType.JSON);
         }
@@ -172,10 +172,10 @@ function getSheet() {
     if (!sheet) {
         sheet = ss.insertSheet(SHEET_NAME);
         // 헤더 설정
-        sheet.getRange(1, 1, 1, 6).setValues([[
-            '이름', '회사명', '연락처', '완료개수', '리워드등급', '제출시간'
+        sheet.getRange(1, 1, 1, 7).setValues([[
+            '이름', '회사명', '연락처', '이메일', '완료개수', '리워드등급', '제출시간'
         ]]);
-        sheet.getRange(1, 1, 1, 6).setFontWeight('bold');
+        sheet.getRange(1, 1, 1, 7).setFontWeight('bold');
         sheet.setFrozenRows(1);
     }
 
@@ -200,9 +200,10 @@ function getAllSubmissions() {
             name: row[0] || '',
             company: row[1] || '',
             phone: row[2] || '',
-            completedCount: row[3] || 0,
-            rewardLevel: row[4] || '',
-            timestamp: row[5] || ''
+            email: row[3] || '',
+            completedCount: row[4] || 0,
+            rewardLevel: row[5] || '',
+            timestamp: row[6] || ''
         });
     }
 
@@ -253,6 +254,7 @@ function saveSubmission(data) {
         data.name,
         data.company,
         data.phone,
+        data.email,
         data.completedCount || 0,
         data.rewardLevel,
         timestamp

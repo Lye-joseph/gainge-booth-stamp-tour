@@ -6,7 +6,7 @@
 
 // ==================== 설정 ====================
 // Google Apps Script Web App URL (배포 후 여기에 입력)
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwmP__E4IAFbjsa8PAsvciSHR4l5EWrSsbH4HcqEkOLbb_JgaoD6-uQMh2ffaSss9l5/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzZWwlU8Dl0I-A9W4Xq6nHMU-F7v2rKU0Qpd3N3Ua3qq_qzMBM98fYW9Xepkp89WLMK/exec';
 
 // 리워드 한도 (Apps Script와 동일하게 유지)
 const REWARD_LIMITS = {
@@ -543,6 +543,7 @@ class StampTourApp {
             name: formData.get('userName'),
             company: formData.get('companyName'),
             phone: formData.get('phoneNumber'),
+            email: formData.get('email'),
             completedCount: completedCount,
             rewardLevel: this.assignedTier === 11 ? '치킨' : this.assignedTier === 9 ? '커피' : '에너지드링크',
             timestamp: new Date().toISOString()
