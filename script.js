@@ -644,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 부스별 링크 설정
             const companyLinks = {
-                '1': 'https://www.alibaba.com/',
+                '1': 'https://korean.alibaba.com/',
                 '2': 'https://www.ksystem.co.kr/?utm_source=gainge',
                 '3': 'https://www.crinity.com/',
                 '4': 'https://forms.gle/Qf1EavEzYKxoRuqH7',
