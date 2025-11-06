@@ -6,7 +6,7 @@
 
 // ==================== 설정 ====================
 // Google Apps Script Web App URL (배포 후 여기에 입력)
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzZWwlU8Dl0I-A9W4Xq6nHMU-F7v2rKU0Qpd3N3Ua3qq_qzMBM98fYW9Xepkp89WLMK/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyQEKkJMFLEZxcA4xfzSUJ40iJRi5zJvDSt9ABbAkrLj4CU6NZgKMcGY1BnDmSZ5Emc/exec';
 
 // 리워드 한도 (Apps Script와 동일하게 유지)
 const REWARD_LIMITS = {
@@ -457,9 +457,14 @@ class StampTourApp {
             remaining = calcRemainingFromList(rows);
         }
 
+        // 네트워크 오류 시 기본값 사용 (한도 전체로 가정)
         if (!remaining) {
-            alert('시트 목록 조회에 실패했습니다. 네트워크 상태를 확인 후 다시 시도해주세요.');
-            return;
+            console.warn('네트워크 조회 실패, 기본값 사용');
+            remaining = {
+                tier11: REWARD_LIMITS.tier11,
+                tier9: REWARD_LIMITS.tier9,
+                tier7: REWARD_LIMITS.tier7
+            };
         }
 
         // 사용 가능한 티어 결정

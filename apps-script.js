@@ -177,6 +177,48 @@ function getSheet() {
         ]]);
         sheet.getRange(1, 1, 1, 8).setFontWeight('bold');
         sheet.setFrozenRows(1);
+    } else {
+        // 기존 시트의 헤더 확인 및 업데이트
+        const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+        const expectedHeaders = ['이름', '직급', '회사명', '연락처', '이메일', '완료개수', '리워드등급', '제출시간'];
+        
+        // 헤더가 다르면 업데이트 (직급 컬럼이 없는 경우 대비)
+        if (headers.length < expectedHeaders.length || headers[1] !== '직급') {
+            // 기존 데이터 백업
+            const data = sheet.getDataRange().getValues();
+            
+            // 헤더 업데이트
+            sheet.getRange(1, 1, 1, expectedHeaders.length).setValues([expectedHeaders]);
+            sheet.getRange(1, 1, 1, expectedHeaders.length).setFontWeight('bold');
+            
+            // 기존 데이터가 있으면 재정렬 (직급 컬럼 추가)
+            if (data.length > 1) {
+                const newData = [];
+                for (let i = 0; i < data.length; i++) {
+                    if (i === 0) continue; // 헤더는 건너뛰기
+                    const oldRow = data[i];
+                    // 기존 형식: [이름, 회사명, 연락처, 이메일, 완료개수, 리워드등급, 제출시간]
+                    // 새 형식: [이름, 직급, 회사명, 연락처, 이메일, 완료개수, 리워드등급, 제출시간]
+                    const newRow = [
+                        oldRow[0] || '', // 이름
+                        '', // 직급 (기존 데이터에는 없으므로 빈 값)
+                        oldRow[1] || '', // 회사명
+                        oldRow[2] || '', // 연락처
+                        oldRow[3] || '', // 이메일
+                        oldRow[4] || 0, // 완료개수
+                        oldRow[5] || '', // 리워드등급
+                        oldRow[6] || '' // 제출시간
+                    ];
+                    newData.push(newRow);
+                }
+                if (newData.length > 0) {
+                    // 기존 데이터 삭제 (헤더 제외)
+                    sheet.deleteRows(2, data.length - 1);
+                    // 새 형식으로 데이터 추가
+                    sheet.getRange(2, 1, newData.length, expectedHeaders.length).setValues(newData);
+                }
+            }
+        }
     }
 
     return sheet;
