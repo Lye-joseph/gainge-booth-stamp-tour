@@ -52,7 +52,31 @@
                         <span class="reward-gift">에너지 드링크 기프티콘</span>
                     </div>
                 </div>
+                <p class="reward-note">*부스 스탬프 투어 리워드는 중복 지급되지 않습니다.</p>
                 <button class="reward-btn" id="rewardBtn" disabled>상품수령 정보 등록하기</button>
+            </div>
+        </div>
+
+        <!-- 리워드 협찬 섹션 (리워드 박스 아래) -->
+        <div class="sponsor-section">
+            <div class="reward-card sponsor-card">
+                <h3>🎁 리워드 협찬</h3>
+                <div class="sponsor-item">
+                    <div class="sponsor-title"><strong>11개 완주자</strong> → 코니 캐릭터 신년패키지 증정</div>
+                    <div class="sponsor-brand-line">| <strong>콘타 협찬 ✨</strong></div>
+                    <ul class="sponsor-list">
+                        <li>👉 신년 캘린더 포함 굿즈 종합 선물세트</li>
+                    </ul>
+                </div>
+                <div class="sponsor-item">
+                    <div class="sponsor-title"><strong>7개 이상 달성자 전원</strong> → 기업 솔루션 3종 세트</div>
+                    <div class="sponsor-brand-line">| <strong>타이거컴퍼니 협찬 ✨</strong></div>
+                    <ul class="sponsor-list">
+                        <li>👉 협업툴 ‘티그리스 1+1’</li>
+                        <li>👉 장애인 고용 원스톱 서비스 ‘플립 1개월 이용권’</li>
+                        <li>👉 중대재해관리 솔루션 ‘세이프로 15% 할인’</li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -197,6 +221,10 @@
                             <input type="text" id="userName" name="userName" required>
                         </div>
                         <div class="form-group">
+                            <label for="position">직급</label>
+                            <input type="text" id="position" name="position" placeholder="예: 매니저 / 팀장 / 주임">
+                        </div>
+                        <div class="form-group">
                             <label for="companyName">회사명 *</label>
                             <input type="text" id="companyName" name="companyName" required>
                         </div>
@@ -208,6 +236,7 @@
                             <label for="email">이메일 *</label>
                             <input type="email" id="email" name="email" required placeholder="example@email.com">
                         </div>
+                        <p class="privacy-note">수집된 개인정보는<br>리워드 전달을 위해서만 사용됩니다</p>
                         <button type="submit" class="submit-btn">정보 등록하기</button>
                     </form>
                 </div>

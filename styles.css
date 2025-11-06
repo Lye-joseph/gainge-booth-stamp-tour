@@ -93,6 +93,10 @@ header h1 {
     margin-bottom: 30px;
 }
 
+.sponsor-section {
+    margin-bottom: 30px;
+}
+
 .reward-card {
     background: white;
     border-radius: 20px;
@@ -106,6 +110,51 @@ header h1 {
     font-size: 18px;
     margin-bottom: 20px;
     font-weight: bold;
+}
+
+.sponsor-card .sponsor-item {
+    text-align: left;
+    margin-bottom: 16px;
+}
+
+.sponsor-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a237e;
+    line-height: 1.35;
+    word-break: keep-all;
+}
+
+.sponsor-desc {
+    font-size: 14px;
+    color: #555;
+    margin-top: 6px;
+}
+
+.sponsor-brand {
+    font-weight: 700;
+    color: #283593;
+}
+
+.sponsor-brand-line {
+    font-size: 13px;
+    color: #444;
+    margin-top: 6px;
+    font-weight: 700;
+}
+
+.sponsor-list {
+    margin-top: 8px;
+    padding-left: 0;
+    list-style: none;
+}
+
+.sponsor-list li {
+    font-size: 14px;
+    color: #444;
+    line-height: 1.5;
+    margin: 4px 0;
+    word-break: keep-all;
 }
 
 .reward-info {
@@ -133,6 +182,13 @@ header h1 {
 .reward-gift {
     color: #666;
     font-size: 14px;
+}
+
+.reward-note {
+    font-style: italic;
+    font-size: 14px; /* 동일 크기: .reward-gift */
+    color: #666;
+    margin-bottom: 14px;
 }
 
 .reward-btn {
@@ -510,6 +566,15 @@ header h1 {
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(26, 35, 126, 0.3);
     margin-top: 10px;
+}
+
+.privacy-note {
+    color: #777;
+    font-size: 12px;
+    line-height: 1.3;
+    text-align: center;
+    margin: 6px 0 8px;
+    word-break: keep-all;
 }
 
 .submit-btn:hover {

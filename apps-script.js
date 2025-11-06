@@ -172,10 +172,10 @@ function getSheet() {
     if (!sheet) {
         sheet = ss.insertSheet(SHEET_NAME);
         // 헤더 설정
-        sheet.getRange(1, 1, 1, 7).setValues([[
-            '이름', '회사명', '연락처', '이메일', '완료개수', '리워드등급', '제출시간'
+        sheet.getRange(1, 1, 1, 8).setValues([[
+            '이름', '직급', '회사명', '연락처', '이메일', '완료개수', '리워드등급', '제출시간'
         ]]);
-        sheet.getRange(1, 1, 1, 7).setFontWeight('bold');
+        sheet.getRange(1, 1, 1, 8).setFontWeight('bold');
         sheet.setFrozenRows(1);
     }
 
@@ -198,12 +198,13 @@ function getAllSubmissions() {
 
         rows.push({
             name: row[0] || '',
-            company: row[1] || '',
-            phone: row[2] || '',
-            email: row[3] || '',
-            completedCount: row[4] || 0,
-            rewardLevel: row[5] || '',
-            timestamp: row[6] || ''
+            position: row[1] || '',
+            company: row[2] || '',
+            phone: row[3] || '',
+            email: row[4] || '',
+            completedCount: row[5] || 0,
+            rewardLevel: row[6] || '',
+            timestamp: row[7] || ''
         });
     }
 
@@ -252,6 +253,7 @@ function saveSubmission(data) {
 
     sheet.appendRow([
         data.name,
+        data.position || '',
         data.company,
         data.phone,
         data.email,

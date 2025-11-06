@@ -541,6 +541,7 @@ class StampTourApp {
 
         const rewardData = {
             name: formData.get('userName'),
+            position: formData.get('position') || '',
             company: formData.get('companyName'),
             phone: formData.get('phoneNumber'),
             email: formData.get('email'),
