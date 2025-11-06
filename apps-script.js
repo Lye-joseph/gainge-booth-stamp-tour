@@ -132,6 +132,17 @@ function doPost(e) {
             ).setMimeType(ContentService.MimeType.JSON);
         }
 
+        // 중복 제출 확인 (이메일 또는 전화번호 기준)
+        const isDuplicate = checkDuplicateSubmission(data.email, data.phone);
+        if (isDuplicate) {
+            return ContentService.createTextOutput(
+                JSON.stringify({
+                    ok: false,
+                    error: '이미 상품수령 정보를 등록하셨습니다. 한 기기당 한 번만 신청 가능합니다.'
+                })
+            ).setMimeType(ContentService.MimeType.JSON);
+        }
+
         // 선착순 가능 여부 확인
         const remaining = getRemainingCounts();
         if ((remaining[tier] || 0) <= 0) {
@@ -181,16 +192,16 @@ function getSheet() {
         // 기존 시트의 헤더 확인 및 업데이트
         const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
         const expectedHeaders = ['이름', '직급', '회사명', '연락처', '이메일', '완료개수', '리워드등급', '제출시간'];
-        
+
         // 헤더가 다르면 업데이트 (직급 컬럼이 없는 경우 대비)
         if (headers.length < expectedHeaders.length || headers[1] !== '직급') {
             // 기존 데이터 백업
             const data = sheet.getDataRange().getValues();
-            
+
             // 헤더 업데이트
             sheet.getRange(1, 1, 1, expectedHeaders.length).setValues([expectedHeaders]);
             sheet.getRange(1, 1, 1, expectedHeaders.length).setFontWeight('bold');
-            
+
             // 기존 데이터가 있으면 재정렬 (직급 컬럼 추가)
             if (data.length > 1) {
                 const newData = [];
@@ -251,6 +262,30 @@ function getAllSubmissions() {
     }
 
     return rows;
+}
+
+/**
+ * 중복 제출 확인 (이메일 또는 전화번호 기준)
+ */
+function checkDuplicateSubmission(email, phone) {
+    const submissions = getAllSubmissions();
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    const normalizedPhone = (phone || '').trim().replace(/[-\s]/g, '');
+
+    for (const sub of submissions) {
+        const subEmail = (sub.email || '').trim().toLowerCase();
+        const subPhone = (sub.phone || '').trim().replace(/[-\s]/g, '');
+
+        // 이메일 또는 전화번호가 일치하면 중복
+        if (normalizedEmail && subEmail && normalizedEmail === subEmail) {
+            return true;
+        }
+        if (normalizedPhone && subPhone && normalizedPhone === subPhone) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
