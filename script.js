@@ -224,6 +224,7 @@ class StampTourApp {
         this.currentBoothId = null;
         this.assignedTier = null; // 11 | 9 | 7
         this.camera = new CameraManager(this.cameraInput);
+        this.isSubmitting = false; // 제출 중 플래그
 
         this.init();
     }
@@ -508,15 +509,38 @@ class StampTourApp {
         this.rewardModal.classList.remove('show');
         this.rewardForm.reset();
         this.assignedTier = null;
+        // 제출 중 플래그 초기화 (모달 닫을 때)
+        this.isSubmitting = false;
+        // 제출 버튼 상태 복원
+        const submitBtn = this.rewardForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '정보 등록하기';
+        }
     }
 
     // 상품수령 정보 제출
     async submitRewardForm() {
+        // 이미 제출 중이면 중복 제출 방지
+        if (this.isSubmitting) {
+            return;
+        }
+
         // 이미 제출한 경우 제출 방지
         if (RewardStorage.isSubmitted()) {
             alert('이미 상품수령 정보를 등록하셨습니다.\n한 기기당 한 번만 신청 가능합니다.');
             this.closeRewardModalFunc();
             return;
+        }
+
+        // 제출 버튼 참조
+        const submitBtn = this.rewardForm.querySelector('button[type="submit"]');
+        
+        // 제출 시작: 버튼 비활성화 및 로딩 상태 표시
+        this.isSubmitting = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = '등록 중...';
         }
 
         const formData = new FormData(this.rewardForm);
@@ -531,6 +555,12 @@ class StampTourApp {
 
         if (!remaining) {
             alert('시트 목록 조회에 실패했습니다. 잠시 후 다시 시도해주세요.');
+            // 제출 실패: 버튼 다시 활성화
+            this.isSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '정보 등록하기';
+            }
             this.closeRewardModalFunc();
             return;
         }
@@ -538,6 +568,12 @@ class StampTourApp {
         const key = this.assignedTier === 11 ? 'tier11' : this.assignedTier === 9 ? 'tier9' : 'tier7';
         if (!this.assignedTier || (remaining[key] || 0) <= 0) {
             alert('제출 직전에 재고가 소진되었습니다. 다시 열어 확인해주세요.');
+            // 제출 실패: 버튼 다시 활성화
+            this.isSubmitting = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '정보 등록하기';
+            }
             this.closeRewardModalFunc();
             return;
         }
@@ -568,6 +604,14 @@ class StampTourApp {
         } catch (error) {
             console.error('상품수령 정보 등록 실패:', error);
             alert('등록 중 오류가 발생했습니다. 다시 시도해주세요.');
+            // 제출 실패: 버튼 다시 활성화
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '정보 등록하기';
+            }
+        } finally {
+            // 제출 완료/실패 여부와 관계없이 플래그 초기화
+            this.isSubmitting = false;
         }
     }
 
