@@ -597,7 +597,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 부스별 링크 설정
             const companyLinks = {
-                '9': 'https://tigris.cloud/tigris-ai-plus' // (주)타이거컴퍼니
+                '1': 'https://www.alibaba.com/',
+                '2': 'https://www.ksystem.co.kr/?utm_source=gainge',
+                '3': 'https://www.crinity.com/',
+                '4': 'https://forms.gle/Qf1EavEzYKxoRuqH7',
+                '5': 'https://www.notion.com/ko',
+                '6': 'https://conta.im/',
+                '7': 'https://www.inflearn.com/intro-group',
+                '8': 'https://www.nodiit.com/',
+                '9': 'https://tigris.cloud/tigris-ai-plus',
+                '10': 'https://me-o.co.kr/',
+                '11': 'https://gainge.com/contents/products/732'
             };
 
             // 링크가 있는 경우 새 탭에서 열기
