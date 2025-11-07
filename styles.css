@@ -108,8 +108,16 @@ header h1 {
 .reward-card h3 {
     color: #1a237e;
     font-size: 18px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     font-weight: bold;
+}
+
+.reward-guide {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+    text-align: left;
+    line-height: 1.5;
 }
 
 .sponsor-card .sponsor-item {
